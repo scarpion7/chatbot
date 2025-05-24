@@ -269,13 +269,10 @@ def build_application_details_string(data: dict, include_user_info: bool, user: 
     text = ""
     default_value = "None1" # Ma'lumot yo'q bo'lsa ko'rsatiladigan standart qiymat
 
-    if include_user_info and user:
-        text += f"👤 **Foydalanuvchi:** "
-        if user.username:
-            text += f"[@{user.username}](tg://user?id={user.id}) (ID: `{user.id}`)\n"
-        else:
-            text += f"[{user.full_name}](tg://user?id={user.id}) (ID: `{user.id}`)\n"
+    if include_user_info and user:    
+        text += f"👤 **Foydalanuvchi:** [{user.full_name}](tg://user?id={user.id}) (ID: `{user.id}`)\n"
         text += f"📝 **Ism:** {user.full_name}\n"
+
 
     text += (
         f"🚻 **Jins:** {data.get('gender', default_value)}\n"
@@ -343,9 +340,10 @@ async def send_application_to_destinations(data: dict, user: types.User):
     header_full = "📊 **Yangi ariza qabul qilindi**\n\n"
     admin_message_text_full = header_full + build_application_details_string(data, include_user_info=True, user=user)
 
-    # 2. ADMIN_GROUP_ID uchun faqat ariza ma'lumotlaridan iborat xabar matni
-    header_restricted = "📊 **Yangi Ariza Tafsilotlari**\n\n" # Umumiy sarlavha
-    application_details_only_text = header_restricted + build_application_details_string(data, include_user_info=False)
+    # 2. ADMIN_GROUP_ID uchun ariza + foydalanuvchi ismi (lekin havolasiz) yuboriladi
+    header_restricted = "📊 **Yangi Ariza Tafsilotlari**\n\n"
+    user_name_only = f"👤 Foydalanuvchi: {user.full_name}\n\n"
+    application_details_only_text = header_restricted + user_name_only + build_application_details_string(data, include_user_info=False)
 
     # "Javob yozish" tugmasi (faqat ADMIN_USER_ID uchun)
     builder_admin_user = InlineKeyboardBuilder()
