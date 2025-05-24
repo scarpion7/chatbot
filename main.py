@@ -268,11 +268,7 @@ def family_husband_agreement_keyboard():
 def build_application_details_string(data: dict, include_user_info: bool, user: types.User = None):
     text = ""
     default_value = "None1" # Ma'lumot yo'q bo'lsa ko'rsatiladigan standart qiymat
-    
-    if include_user_info and user:
-        text += f"👤 **Foydalanuvchi:** {user.full_name} | [Profilga o‘tish](tg://user?id={user.id})\n"
-        text += f"📝 **Ism:** {user.full_name}\n"
-
+        
     if include_user_info and user:
         text += f"👤 **Foydalanuvchi:** "
         if user.username:
