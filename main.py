@@ -269,9 +269,10 @@ def build_application_details_string(data: dict, include_user_info: bool, user: 
     text = ""
     default_value = "None1" # Ma'lumot yo'q bo'lsa ko'rsatiladigan standart qiymat
 
-    if include_user_info and user:    
-        text += f"👤 **Foydalanuvchi:** [{user.full_name}](tg://user?id={user.id}) (ID: `{user.id}`)\n"
-        text += f"📝 **Ism:** {user.full_name}\n"
+    if user.username:
+        text += f"[@{user.username}](tg://user?id={user.id}) (ID: `{user.id}`)\n"
+    else:
+        text += f"[{user.full_name}](tg://user?id={user.id}) (ID: `{user.id}`)\n"
 
 
     text += (
