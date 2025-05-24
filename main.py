@@ -23,7 +23,7 @@ TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_USER_ID = int(os.getenv("ADMIN_USER_ID"))
 ADMIN_GROUP_ID = int(os.getenv("ADMIN_GROUP_ID"))
 CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
-SECOND_CHANNEL_ID = int(os.getenv("SECOND_CHANNEL_ID"))
+ADMIN_SECOND_GROUP_ID = int(os.getenv("ADMIN_SECOND_GROUP_ID "))
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 WEB_SERVER_HOST = "0.0.0.0"
 WEB_SERVER_PORT = int(os.getenv("PORT", 8000))
@@ -356,61 +356,22 @@ async def send_application_to_destinations(data: dict, user: types.User):
         except Exception as e_admin:
             logging.error(f"Failed to send error notification to admin user about group error: {e_admin}")
         # Yangi kanalga faqat qisqa ariza xabari va user havolasi bilan yuborish
-        short_text = f"📩 *Yangi ariza!*\n"
-        if user.username:
-            short_text += f"👤 [@{user.username}](tg://user?id={user.id}) (ID: `{user.id}`)\n"
-        else:
-            short_text += f"👤 [{user.full_name}](tg://user?id={user.id}) (ID: `{user.id}`)\n"
-        short_text += f"📝 *Jins:* {data.get('gender', 'Nomaʼlum')}\n"
-        short_text += f"🗺 *Viloyat:* {data.get('viloyat', 'Nomaʼlum')}\n"
-        short_text += f"🏘 *Tuman:* {data.get('tuman', 'Nomaʼlum')}"
-
+    try:
+        await bot.send_message(
+            chat_id=ADMIN_SECOND_GROUP_ID ,
+            text=admin_message_text,
+            reply_markup=reply_markup,
+            parse_mode="Markdown"
+        )
+        logging.info(f"Application sent to admin group {ADMIN_SECOND_GROUP_ID } for user {user.id}")
+    except Exception as e:
+        logging.error(f"Failed to send application to admin group {ADMIN_SECOND_GROUP_ID } for user {user.id}: {e}")
         try:
-            await bot.send_message(
-                chat_id=SECOND_CHANNEL_ID,
-                text=short_text,
-                parse_mode="Markdown"
-            )
-            logging.info(f"Short application sent to second channel {SECOND_CHANNEL_ID} for user {user.id}")
-        except Exception as e:
-            logging.error(f"Failed to send short application to second channel {SECOND_CHANNEL_ID}: {e}")
-            try:
-                await bot.send_message(ADMIN_USER_ID,
-                                       f"⚠️ Ogohlantirish: Foydalanuvchi `{user.id}` arizasini ikkinchi kanalga yuborishda xatolik: {e}",
-                                       parse_mode="Markdown")
-            except Exception as e_admin:
-                logging.error(f"Failed to send error notification to admin user about second channel error: {e_admin}")
-
-        # Asosiy kanalga (CHANNEL_ID) to'liq ma'lumotlarni yuborish
-        channel_text = f"📊 **Yangi ariza**\n\n📝 **Ism:** {user.full_name}\n"
-
-        if data.get('gender'):
-            channel_text += f"🚻 **Jins:** {data['gender']}\n"
-        if data.get('viloyat'):
-            channel_text += f"🗺️ **Viloyat:** {data['viloyat']}\n"
-        if data.get('tuman'):
-            channel_text += f"🏘️ **Tuman:** {data['tuman']}\n"
-        # ... (qolgan to'liq ariza matni) ...
-        if data.get('about'):
-            channel_text += f"ℹ️ **Qo'shimcha / Kutilayotgan natija:** {data['about']}\n"
-
-        channel_text += "\n---\nBu ariza kanalga avtomatik joylandi."
-
-        try:
-            await bot.send_message(
-                CHANNEL_ID,
-                channel_text,
-                parse_mode="Markdown"
-            )
-            logging.info(f"Application sent to channel {CHANNEL_ID} for user {user.id}")
-        except Exception as e:
-            logging.error(f"Failed to send application to channel {CHANNEL_ID} for user {user.id}: {e}")
-            try:
-                await bot.send_message(ADMIN_USER_ID,
-                                       f"⚠️ Ogohlantirish: Foydalanuvchi `{user.id}` arizasini kanalga yuborishda xatolik: {e}",
-                                       parse_mode="Markdown")
-            except Exception as e_admin:
-                logging.error(f"Failed to send error notification to admin user about channel error: {e_admin}")
+            await bot.send_message(ADMIN_USER_ID,
+                                   f"⚠️ Ogohlantirish: Foydalanuvchi `{user.id}` arizasini admin guruhiga yuborishda xatolik: {e}",
+                                   parse_mode="Markdown")
+        except Exception as e_admin:
+            logging.error(f"Failed to send error notification to admin user about group error: {e_admin}")
 
     channel_text = f"📊 **Yangi ariza**\n\n📝 **Ism:** {user.full_name}\n"
 
