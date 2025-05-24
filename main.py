@@ -268,11 +268,12 @@ def family_husband_agreement_keyboard():
 def build_application_details_string(data: dict, include_user_info: bool, user: types.User = None):
     text = ""
     default_value = "None1" # Ma'lumot yo'q bo'lsa ko'rsatiladigan standart qiymat
-
-    if user.username:
-        text += f"[@{user.username}](tg://user?id={user.id}) (ID: `{user.id}`)\n"
-    else:
-        text += f"[{user.full_name}](tg://user?id={user.id}) (ID: `{user.id}`)\n"
+    
+    if include_user_info:
+        if user.username:
+            text += f"[@{user.username}](tg://user?id={user.id}) (ID: `{user.id}`)\n"
+        else:
+            text += f"[{user.full_name}](tg://user?id={user.id}) (ID: `{user.id}`)\n"
 
 
     text += (
