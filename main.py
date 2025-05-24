@@ -317,7 +317,7 @@ def build_application_details_string(data: dict, include_user_info: bool, user: 
 
         if author_val == 'husband':
             h_choice_val = data.get('h_choice')
-            h_choice_text_map = {'mjm': '👥 MJM', 'erkak': '👨 Erkak (ayoli uchun)'}
+            h_choice_text_map = {'mjm': '👥 MJM', 'erkak': '👨 Hushtor (ayolim uchun)'}
             text += f"🎯 **Erkak tanlovi:** {h_choice_text_map.get(h_choice_val, default_value)}\n"
             if h_choice_val == 'mjm':
                 text += f"👥 **MJM tajriba:** {data.get('mjm_experience', default_value)}\n"
