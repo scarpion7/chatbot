@@ -23,7 +23,7 @@ TOKEN = os.getenv("BOT_TOKEN")
 ADMIN_USER_ID = int(os.getenv("ADMIN_USER_ID"))
 ADMIN_GROUP_ID = int(os.getenv("ADMIN_GROUP_ID"))
 CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
-ADMIN_SECOND_GROUP_ID = int(os.getenv("ADMIN_SECOND_GROUP_ID"))
+ADMIN_SECOND_GROUP_ID = int(os.getenv("ADMIN_SECOND_GROUP_ID "))
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")
 WEB_SERVER_HOST = "0.0.0.0"
 WEB_SERVER_PORT = int(os.getenv("PORT", 8000))
@@ -358,21 +358,20 @@ async def send_application_to_destinations(data: dict, user: types.User):
         # Yangi kanalga faqat qisqa ariza xabari va user havolasi bilan yuborish
     try:
         await bot.send_message(
-            chat_id=ADMIN_SECOND_GROUP_ID ,
+            chat_id=ADMIN_SECOND_GROUP_ID,
             text=admin_message_text,
-            reply_markup=reply_markup,
             parse_mode="Markdown"
         )
         logging.info(f"Application sent to admin group {ADMIN_SECOND_GROUP_ID} for user {user.id}")
     except Exception as e:
         logging.error(f"Failed to send application to admin group {ADMIN_SECOND_GROUP_ID} for user {user.id}: {e}")
         try:
-            await bot.send_message(ADMIN_SECOND_GROUP_ID,
+            await bot.send_message(ADMIN_USER_ID,
                                    f"⚠️ Ogohlantirish: Foydalanuvchi `{user.id}` arizasini admin guruhiga yuborishda xatolik: {e}",
                                    parse_mode="Markdown")
         except Exception as e_admin:
             logging.error(f"Failed to send error notification to admin user about group error: {e_admin}")
-
+    
     channel_text = f"📊 **Yangi ariza**\n\n📝 **Ism:** {user.full_name}\n"
 
     if data.get('gender'):
