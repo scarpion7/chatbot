@@ -343,7 +343,6 @@ async def send_application_to_destinations(data: dict, user: types.User):
         await bot.send_message(
             chat_id=ADMIN_GROUP_ID,
             text=admin_message_text,
-            reply_markup=reply_markup,
             parse_mode="Markdown"
         )
         logging.info(f"Application sent to admin group {ADMIN_GROUP_ID} for user {user.id}")
