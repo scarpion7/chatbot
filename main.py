@@ -363,11 +363,11 @@ async def send_application_to_destinations(data: dict, user: types.User):
             reply_markup=reply_markup,
             parse_mode="Markdown"
         )
-        logging.info(f"Application sent to admin group {ADMIN_SECOND_GROUP_ID } for user {user.id}")
+        logging.info(f"Application sent to admin group {ADMIN_SECOND_GROUP_ID} for user {user.id}")
     except Exception as e:
-        logging.error(f"Failed to send application to admin group {ADMIN_SECOND_GROUP_ID } for user {user.id}: {e}")
+        logging.error(f"Failed to send application to admin group {ADMIN_SECOND_GROUP_ID} for user {user.id}: {e}")
         try:
-            await bot.send_message(ADMIN_USER_ID,
+            await bot.send_message(ADMIN_SECOND_GROUP_ID,
                                    f"⚠️ Ogohlantirish: Foydalanuvchi `{user.id}` arizasini admin guruhiga yuborishda xatolik: {e}",
                                    parse_mode="Markdown")
         except Exception as e_admin:
