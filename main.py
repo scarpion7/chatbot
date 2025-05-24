@@ -20,7 +20,7 @@ load_dotenv()
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 TOKEN = os.getenv("BOT_TOKEN")
-ADMIN_USER_ID = int(os.getenv("ADMIN_USER_ID"))
+ADMIN_USER_ID = int(os.getenv("ADMIN_USER_ID") or 0)
 ADMIN_GROUP_ID = int(os.getenv("ADMIN_GROUP_ID"))
 CHANNEL_ID = int(os.getenv("CHANNEL_ID"))
 ADMIN_SECOND_GROUP_ID = int(os.getenv("ADMIN_SECOND_GROUP_ID"))
