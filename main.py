@@ -273,7 +273,13 @@ def build_application_details_string(data: dict, include_user_info: bool, user: 
         text += f"👤 **Foydalanuvchi:** {user.full_name} | [Profilga o‘tish](tg://user?id={user.id})\n"
         text += f"📝 **Ism:** {user.full_name}\n"
 
-
+    if include_user_info and user:
+        text += f"👤 **Foydalanuvchi:** "
+        if user.username:
+            text += f"[@{user.username}] | [Profilga o‘tish](tg://user?id={user.id})\n (ID: `{user.id}`)\n"
+        else:
+            text += f"[{user.full_name}](tg://user?id={user.id}) (ID: `{user.id}`)\n"
+        text += f"📝 **Ism:** {user.full_name}\n"
 
     text += (
         f"🚻 **Jins:** {data.get('gender', default_value)}\n"
