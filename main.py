@@ -1,3 +1,4 @@
+l iga o'xhsab
 from dotenv import load_dotenv
 import os
 import logging
@@ -108,16 +109,16 @@ POSES_WOMAN = [
 
 # MJM tajribasi variantlari (Oila uchun)
 MJM_EXPERIENCE_OPTIONS = [
-    "Hali bo'lmagan",
-    "1-marta bo'lgan",
+    "Hali bo'lmagan 1-si",
+    "1 marta bo'lgan",
     "2-3 marta bo'lgan",
     "5 martadan ko'p (MJMni sevamiz)"
 ]
 
 # MJM tajribasi variantlari (Ayol uchun)
 MJM_EXPERIENCE_FEMALE_OPTIONS = [
-    "Hali bo'lmagan",
-    "1-marta bo'lgan",
+    "Hali bo'lmagan 1-si",
+    "1 marta bo'lgan",
     "2-3 marta bo'lgan",
     "5 martadan ko'p (MJMni sevaman)"
 ]
@@ -167,7 +168,7 @@ def tuman_keyboard(viloyat):
 # Ayolning yoshini tanlash klaviaturasi (Vertical)
 def age_female_keyboard():
     builder = InlineKeyboardBuilder()
-    ranges = ["18-25", "26-35", "36-45", "45+"]
+    ranges = ["18-23", "24-29", "30-35", "36-40","40+"]
     for r in ranges:
         builder.row(types.InlineKeyboardButton(text=r, callback_data=f"age_{r}"))
     add_navigation_buttons(builder, "tuman")
@@ -178,7 +179,7 @@ def age_female_keyboard():
 def female_choice_keyboard():
     builder = InlineKeyboardBuilder()
     builder.row(types.InlineKeyboardButton(text="👨 Erkak bilan", callback_data="choice_1"))
-    builder.row(types.InlineKeyboardButton(text="👥 MJM (2ta erkak)", callback_data="choice_2"))
+    builder.row(types.InlineKeyboardButton(text="👥 MJM (2 erkak bilan)", callback_data="choice_2"))
     builder.row(types.InlineKeyboardButton(text="👭 JMJ (Dugonam bor)", callback_data="choice_3"))
     add_navigation_buttons(builder, "age_female")
     return builder.as_markup()
@@ -213,8 +214,8 @@ def mjm_experience_keyboard(is_female=False):
 # Oila: Kim yozmoqda klaviaturasi (Vertical)
 def family_author_keyboard():
     builder = InlineKeyboardBuilder()
-    builder.row(types.InlineKeyboardButton(text="👨 Erkak yozmoqda", callback_data="author_husband"))
-    builder.row(types.InlineKeyboardButton(text="👩 Ayol yozmoqda", callback_data="author_wife"))
+    builder.row(types.InlineKeyboardButton(text="👨 Erkak yozmoqda...", callback_data="author_husband"))
+    builder.row(types.InlineKeyboardButton(text="👩 Ayol yozmoqda...", callback_data="author_wife"))
     add_navigation_buttons(builder, "family_wife_age")
     return builder.as_markup()
 
@@ -223,7 +224,7 @@ def family_author_keyboard():
 def family_husband_choice_keyboard():
     builder = InlineKeyboardBuilder()
     builder.row(types.InlineKeyboardButton(text="👥 MJM", callback_data="h_choice_mjm"))
-    builder.row(types.InlineKeyboardButton(text="👨 Erkak (ayolim uchun)", callback_data="h_choice_erkak"))
+    builder.row(types.InlineKeyboardButton(text="👨 Hushttor (ayolim uchun)", callback_data="h_choice_erkak"))
     add_navigation_buttons(builder, "family_author")
     return builder.as_markup()
 
@@ -231,11 +232,11 @@ def family_husband_choice_keyboard():
 # Oila: Ayolning roziligi klaviaturasi (Erkak tanlovidan keyin) (Vertical)
 def family_wife_agreement_keyboard():
     builder = InlineKeyboardBuilder()
-    builder.row(types.InlineKeyboardButton(text="✅ Ha rozi", callback_data="wife_agree_yes"))
+    builder.row(types.InlineKeyboardButton(text="✅ Ha rozi", callback_data="wife_agree_Yes"))
     builder.row(
-        types.InlineKeyboardButton(text="🔄 Yo'q, lekin men istayman (kondiraman)", callback_data="wife_agree_convince"))
+        types.InlineKeyboardButton(text="🔄 Yo'q, lekin men istayman (kondiraman)", callback_data="wife_agree_No "))
     builder.row(
-        types.InlineKeyboardButton(text="❓ Bilmayman, hali aytib ko'rmadim", callback_data="wife_agree_unknown"))
+        types.InlineKeyboardButton(text="❓ Bilmayman, hali aytib ko'rmadim", callback_data="wife_agree_IDK"))
     add_navigation_buttons(builder, "family_husband_choice")
     return builder.as_markup()
 
@@ -245,7 +246,7 @@ def family_wife_choice_keyboard():
     builder = InlineKeyboardBuilder()
     builder.row(types.InlineKeyboardButton(text="👥 MJM (erim bilan)", callback_data="w_choice_mjm_husband"))
     builder.row(types.InlineKeyboardButton(text="👥 MJM (begona 2 erkak bilan)", callback_data="w_choice_mjm_strangers"))
-    builder.row(types.InlineKeyboardButton(text="👨 Erkak (erimdan qoniqmayapman)", callback_data="w_choice_erkak"))
+    builder.row(types.InlineKeyboardButton(text="👨 Hushtor (erimdan qoniqmayapman)", callback_data="w_choice_erkak"))
     add_navigation_buttons(builder, "family_author")
     return builder.as_markup()
 
@@ -255,78 +256,109 @@ def family_husband_agreement_keyboard():
     builder = InlineKeyboardBuilder()
     builder.row(types.InlineKeyboardButton(text="✅ Ha rozi", callback_data="husband_agree_yes"))
     builder.row(types.InlineKeyboardButton(text="🔄 Yo'q, lekin men istayman (kondiraman)",
-                                           callback_data="husband_agree_convince"))
+                                           callback_data="husband_agree_No"))
     builder.row(
-        types.InlineKeyboardButton(text="❓ Bilmayman, hali aytib ko'rmadim", callback_data="husband_agree_unknown"))
+        types.InlineKeyboardButton(text="❓ Bilmayman, hali aytib ko'rmadim", callback_data="husband_agree_IDK"))
     add_navigation_buttons(builder, "family_wife_choice")
     return builder.as_markup()
 
 
-# Admin panelga va kanalga ma'lumotlarni yuborish funksiyasi (Uch manzilga)
-async def send_application_to_destinations(data: dict, user: types.User):
-    admin_message_text = (
-        f"📊 **Yangi ariza qabul qilindi**\n\n"
-        f"👤 **Foydalanuvchi:** "
-    )
-    if user.username:
-        admin_message_text += f"[@{user.username}](tg://user?id={user.id}) (ID: `{user.id}`)\n"
-    else:
-        admin_message_text += f"[{user.full_name}](tg://user?id={user.id}) (ID: `{user.id}`)\n"
 
-    admin_message_text += (
-        f"📝 **Ism:** {user.full_name}\n"
-        f"🚻 **Jins:** {data.get('gender', 'None1')}\n"
-        f"🗺️ **Viloyat:** {data.get('viloyat', 'None1')}\n"
-        f"🏘️ **Tuman:** {data.get('tuman', 'None1')}\n"
+# Helper function to build the application details string
+# Bu yordamchi funksiya ariza tafsilotlarini matn ko'rinishida shakllantiradi
+def build_application_details_string(data: dict, include_user_info: bool, user: types.User = None):
+    text = ""
+    default_value = "None1" # Ma'lumot yo'q bo'lsa ko'rsatiladigan standart qiymat
+
+    if include_user_info and user:
+        text += f"👤 **Foydalanuvchi:** "
+        if user.username:
+            text += f"[@{user.username}](tg://user?id={user.id}) (ID: `{user.id}`)\n"
+        else:
+            text += f"[{user.full_name}](tg://user?id={user.id}) (ID: `{user.id}`)\n"
+        text += f"📝 **Ism:** {user.full_name}\n"
+
+    text += (
+        f"🚻 **Jins:** {data.get('gender', default_value)}\n"
+        f"🗺️ **Viloyat:** {data.get('viloyat', default_value)}\n"
+        f"🏘️ **Tuman:** {data.get('tuman', default_value)}\n"
     )
 
-    if data.get('gender') == 'female':
-        admin_message_text += (
-            f"🎂 **Yosh:** {data.get('age', 'None1')}\n"
-            f"🤝 **Tanlov:** {'Erkak bilan' if data.get('choice') == '1' else ('👥 MJM (2ta erkak)' if data.get('choice') == '2' else ('👭 JMJ (Dugonam bor)' if data.get('choice') == '3' else 'None1'))}\n"
+    gender_specific_data = data.get('gender')
+    if gender_specific_data == 'female':
+        choice_val = data.get('choice')
+        choice_text_map = {'1': 'Erkak bilan', '2': '👥 MJM (2ta erkak)', '3': '👭 JMJ (Dugonam bor)'}
+        text += (
+            f"🎂 **Yosh:** {data.get('age', default_value)}\n"
+            f"🤝 **Tanlov:** {choice_text_map.get(choice_val, default_value)}\n"
         )
-        if data.get('choice') == '1':
-            admin_message_text += f"🤸 **Pozitsiya:** {data.get('pose', 'None1')}\n"
-        elif data.get('choice') == '2':
-            admin_message_text += f"👥 **MJM tajriba:** {data.get('mjm_experience_female', 'None1')}\n"
-        elif data.get('choice') == '3':
-            admin_message_text += (
-                f"🎂 **Dugona yoshi:** {data.get('jmj_age', 'None1')}\n"
-                f"ℹ️ **Dugona haqida:** {data.get('jmj_details', 'None1')}\n"
+        if choice_val == '1':
+            text += f"🤸 **Pozitsiya:** {data.get('pose', default_value)}\n"
+        elif choice_val == '2':
+            text += f"👥 **MJM tajriba:** {data.get('mjm_experience_female', default_value)}\n"
+        elif choice_val == '3':
+            text += (
+                f"🎂 **Dugona yoshi:** {data.get('jmj_age', default_value)}\n"
+                f"ℹ️ **Dugona haqida:** {data.get('jmj_details', default_value)}\n"
             )
-
-    elif data.get('gender') == 'family':
-        admin_message_text += (
-            f"👨 **Erkak yoshi:** {data.get('husband_age', 'None1')}\n"
-            f"👩 **Ayol yoshi:** {data.get('wife_age', 'None1')}\n"
-            f"✍️ **Yozmoqda:** {'Erkak' if data.get('author') == 'husband' else ('Ayol' if data.get('author') == 'wife' else 'None1')}\n"
+    elif gender_specific_data == 'family':
+        author_val = data.get('author')
+        author_text_map = {'husband': 'Erkak', 'wife': 'Ayol'}
+        text += (
+            f"👨 **Erkak yoshi:** {data.get('husband_age', default_value)}\n"
+            f"👩 **Ayol yoshi:** {data.get('wife_age', default_value)}\n"
+            f"✍️ **Yozmoqda:** {author_text_map.get(author_val, default_value)}\n"
         )
-        if data.get('author') == 'husband':
-            h_choice_text = {'mjm': '👥 MJM', 'erkak': '👨 Erkak (ayoli uchun)'}.get(data.get('h_choice'), 'None1')
-            admin_message_text += f"🎯 **Erkak tanlovi:** {h_choice_text}\n"
-            if data.get('h_choice') == 'mjm':
-                admin_message_text += f"👥 **MJM tajriba:** {data.get('mjm_experience', 'None1')}\n"
-            admin_message_text += f"👩‍⚕️ **Ayol roziligi:** {data.get('wife_agreement', 'None1')}\n"
 
-        elif data.get('author') == 'wife':
-            w_choice_text = {'mjm_husband': '👥 MJM (erim bilan)', 'mjm_strangers': '👥 MJM (begona 2 erkak bilan)',
-                             'erkak': '👨 Erkak (erimdan qoniqmayapman)'}.get(data.get('w_choice'), 'None1')
-            admin_message_text += f"🎯 **Ayol tanlovi:** {w_choice_text}\n"
-            if data.get('w_choice') == 'mjm_husband':
-                admin_message_text += f"👨‍⚕️ **Erkak roziligi:** {data.get('husband_agreement', 'None1')}\n"
+        agreement_text_map = {
+            'Yes': '✅ Ha rozi',
+            'No': "🔄 Yo'q, lekin men istayman (kondiraman)",
+            'IDK': "❓ Bilmayman, hali aytib ko'rmadim"
+        }
+
+        if author_val == 'husband':
+            h_choice_val = data.get('h_choice')
+            h_choice_text_map = {'mjm': '👥 MJM', 'erkak': '👨 Erkak (ayoli uchun)'}
+            text += f"🎯 **Erkak tanlovi:** {h_choice_text_map.get(h_choice_val, default_value)}\n"
+            if h_choice_val == 'mjm':
+                text += f"👥 **MJM tajriba:** {data.get('mjm_experience', default_value)}\n"
+            text += f"👩‍⚕️ **Ayol roziligi:** {agreement_text_map.get(data.get('wife_agreement'), data.get('wife_agreement', default_value))}\n"
+        elif author_val == 'wife':
+            w_choice_val = data.get('w_choice')
+            w_choice_text_map = {
+                'mjm_husband': '👥 MJM (erim bilan)',
+                'mjm_strangers': '👥 MJM (begona 2 erkak bilan)',
+                'erkak': '👨 Erkak (erimdan qoniqmayapman)'
+            }
+            text += f"🎯 **Ayol tanlovi:** {w_choice_text_map.get(w_choice_val, default_value)}\n"
+            if w_choice_val == 'mjm_husband':
+                text += f"👨‍⚕️ **Erkak roziligi:** {agreement_text_map.get(data.get('husband_agreement'), data.get('husband_agreement', default_value))}\n"
 
     if data.get('about'):
-        admin_message_text += f"ℹ️ **Qo'shimcha / Kutilayotgan natija:** {data.get('about', 'None1')}\n"
+        text += f"ℹ️ **Qo'shimcha malumotlar:** {data.get('about', default_value)}\n"
+    return text
 
-    builder = InlineKeyboardBuilder()
-    builder.button(text="✉️ Javob yozish", callback_data=f"admin_initiate_reply_{user.id}")
-    reply_markup = builder.as_markup()
 
+async def send_application_to_destinations(data: dict, user: types.User):
+    # 1. ADMIN_USER_ID va ADMIN_SECOND_GROUP_ID uchun to'liq ma'lumotli xabar matni
+    header_full = "📊 **Yangi ariza qabul qilindi**\n\n"
+    admin_message_text_full = header_full + build_application_details_string(data, include_user_info=True, user=user)
+
+    # 2. ADMIN_GROUP_ID uchun faqat ariza ma'lumotlaridan iborat xabar matni
+    header_restricted = "📊 **Yangi Ariza Tafsilotlari**\n\n" # Umumiy sarlavha
+    application_details_only_text = header_restricted + build_application_details_string(data, include_user_info=False)
+
+    # "Javob yozish" tugmasi (faqat ADMIN_USER_ID uchun)
+    builder_admin_user = InlineKeyboardBuilder()
+    builder_admin_user.button(text="✉️ Javob yozish", callback_data=f"admin_initiate_reply_{user.id}")
+    reply_markup_for_admin_user = builder_admin_user.as_markup()
+
+    # ADMIN_USER_ID ga yuborish (To'liq ma'lumot + Javob yozish tugmasi)
     try:
         await bot.send_message(
             chat_id=ADMIN_USER_ID,
-            text=admin_message_text,
-            reply_markup=reply_markup,
+            text=admin_message_text_full,
+            reply_markup=reply_markup_for_admin_user, # BU YERDA TUGMA BOR
             parse_mode="Markdown"
         )
         logging.info(f"Application sent to admin user {ADMIN_USER_ID} for user {user.id}")
@@ -339,93 +371,99 @@ async def send_application_to_destinations(data: dict, user: types.User):
         except Exception as e_admin:
             logging.error(f"Failed to send error notification to admin user: {e_admin}")
 
+    # ADMIN_GROUP_ID ga yuborish (Faqat ariza ma'lumotlari, FOYDALANUVCHI MA'LUMOTLARISIZ va TUGMASIZ)
     try:
         await bot.send_message(
             chat_id=ADMIN_GROUP_ID,
-            text=admin_message_text,
+            text=application_details_only_text, # Cheklangan matndan foydalanish
+            reply_markup=None,  # <<<<<<<<<<< BU YERDA TUGMA OLIB TASHLANDI (None)
             parse_mode="Markdown"
         )
-        logging.info(f"Application sent to admin group {ADMIN_GROUP_ID} for user {user.id}")
+        logging.info(f"Application (details only, no user link, no button) sent to admin group {ADMIN_GROUP_ID} for user {user.id}")
     except Exception as e:
         logging.error(f"Failed to send application to admin group {ADMIN_GROUP_ID} for user {user.id}: {e}")
         try:
-            await bot.send_message(ADMIN_USER_ID,
-                                   f"⚠️ Ogohlantirish: Foydalanuvchi `{user.id}` arizasini admin guruhiga yuborishda xatolik: {e}",
+            await bot.send_message(ADMIN_USER_ID, # Asosiy adminga xatolik haqida xabar
+                                   f"⚠️ Ogohlantirish: Foydalanuvchi `{user.id}` arizasini ADMIN_GROUP_ID (`{ADMIN_GROUP_ID}`)ga yuborishda xatolik: {e}",
                                    parse_mode="Markdown")
         except Exception as e_admin:
             logging.error(f"Failed to send error notification to admin user about group error: {e_admin}")
-        # Yangi kanalga faqat qisqa ariza xabari va user havolasi bilan yuborish
+
+    # ADMIN_SECOND_GROUP_ID ga yuborish (To'liq ma'lumot, lekin tugmasiz - avvalgi logikaga ko'ra)
     try:
         await bot.send_message(
             chat_id=ADMIN_SECOND_GROUP_ID,
-            text=admin_message_text,
+            text=admin_message_text_full, # To'liq ma'lumotlar bilan
+            reply_markup=None, # Bu guruh uchun avval ham reply_markup yo'q edi yoki None bo'lishi kerak
             parse_mode="Markdown"
         )
-        logging.info(f"Application sent to admin group {ADMIN_SECOND_GROUP_ID} for user {user.id}")
+        logging.info(f"Application sent to admin second group {ADMIN_SECOND_GROUP_ID} for user {user.id}")
     except Exception as e:
-        logging.error(f"Failed to send application to admin group {ADMIN_SECOND_GROUP_ID} for user {user.id}: {e}")
+        logging.error(f"Failed to send application to admin second group {ADMIN_SECOND_GROUP_ID} for user {user.id}: {e}")
         try:
-            await bot.send_message(ADMIN_USER_ID,
-                                   f"⚠️ Ogohlantirish: Foydalanuvchi `{user.id}` arizasini admin guruhiga yuborishda xatolik: {e}",
+            await bot.send_message(ADMIN_USER_ID, # Asosiy adminga xatolik haqida xabar
+                                   f"⚠️ Ogohlantirish: Foydalanuvchi `{user.id}` arizasini ADMIN_SECOND_GROUP_ID (`{ADMIN_SECOND_GROUP_ID}`)ga yuborishda xatolik: {e}",
                                    parse_mode="Markdown")
         except Exception as e_admin:
             logging.error(f"Failed to send error notification to admin user about group error: {e_admin}")
-    
+
+    # Kanalga yuboriladigan xabar (channel_text) logikasi o'zgarishsiz qoladi
     channel_text = f"📊 **Yangi ariza**\n\n📝 **Ism:** {user.full_name}\n"
+    default_value_channel = "None1" 
 
     if data.get('gender'):
-        channel_text += f"🚻 **Jins:** {data['gender']}\n"
+        channel_text += f"🚻 **Jins:** {data.get('gender', default_value_channel)}\n"
     if data.get('viloyat'):
-        channel_text += f"🗺️ **Viloyat:** {data['viloyat']}\n"
+        channel_text += f"🗺️ **Viloyat:** {data.get('viloyat', default_value_channel)}\n"
     if data.get('tuman'):
-        channel_text += f"🏘️ **Tuman:** {data['tuman']}\n"
+        channel_text += f"🏘️ **Tuman:** {data.get('tuman', default_value_channel)}\n"
+
     if data.get('gender') == 'female':
         if data.get('age'):
-            channel_text += f"🎂 **Yosh:** {data['age']}\n"
+            channel_text += f"🎂 **Yosh:** {data.get('age', default_value_channel)}\n"
         if data.get('choice'):
-            choice_text = {'1': 'Erkak bilan', '2': '👥 MJM (2ta erkak)', '3': '👭 JMJ (Dugonam bor)'}.get(data['choice'],
-                                                                                                         'None1')
-            channel_text += f"🤝 **Tanlov:** {choice_text}\n"
-        if data.get('pose'):
-            channel_text += f"🤸 **Pozitsiya:** {data['pose']}\n"
+            choice_text_channel_map = {'1': 'Erkak bilan', '2': '👥 MJM (2ta erkak)', '3': '👭 JMJ (Dugonam bor)'}
+            channel_text += f"🤝 **Tanlov:** {choice_text_channel_map.get(data.get('choice'), default_value_channel)}\n"
+        if data.get('pose') and data.get('choice') == '1':
+            channel_text += f"🤸 **Pozitsiya:** {data.get('pose', default_value_channel)}\n"
         if data.get('mjm_experience_female') and data.get('choice') == '2':
-            channel_text += f"👥 **MJM tajriba:** {data['mjm_experience_female']}\n"
+            channel_text += f"👥 **MJM tajriba:** {data.get('mjm_experience_female', default_value_channel)}\n"
         if data.get('jmj_age') and data.get('choice') == '3':
-            channel_text += f"🎂 **Dugona yoshi:** {data['jmj_age']}\n"
+            channel_text += f"🎂 **Dugona yoshi:** {data.get('jmj_age', default_value_channel)}\n"
         if data.get('jmj_details') and data.get('choice') == '3':
-            channel_text += f"ℹ️ **Dugona haqida:** {data['jmj_details']}\n"
+            channel_text += f"ℹ️ **Dugona haqida:** {data.get('jmj_details', default_value_channel)}\n"
     elif data.get('gender') == 'family':
         if data.get('husband_age'):
-            channel_text += f"👨 **Erkak yoshi:** {data['husband_age']}\n"
+            channel_text += f"👨 **Erkak yoshi:** {data.get('husband_age', default_value_channel)}\n"
         if data.get('wife_age'):
-            channel_text += f"👩 **Ayol yoshi:** {data['wife_age']}\n"
+            channel_text += f"👩 **Ayol yoshi:** {data.get('wife_age', default_value_channel)}\n"
         if data.get('author'):
-            author_text = {'husband': 'Erkak', 'wife': 'Ayol'}.get(data['author'], 'None1')
-            channel_text += f"✍️ **Yozmoqda:** {author_text}\n"
-        if data.get('h_choice') and data.get('author') == 'husband':
-            h_choice_text = {'mjm': '👥 MJM', 'erkak': '👨 Erkak (ayoli uchun)'}.get(data['h_choice'], 'None1')
-            channel_text += f"🎯 **Erkak tanlovi:** {h_choice_text}\n"
-        if data.get('mjm_experience') and data.get('author') == 'husband' and data.get(
-                'h_choice') == 'mjm':
-            channel_text += f"👥 **MJM tajriba:** {data['mjm_experience']}\n"
-        if data.get('wife_agreement') and data.get('author') == 'husband':
-            wife_agree_text = {'yes': '✅ Ha rozi', 'convince': '🔄 Yo\'q, lekin men istayman',
-                               'unknown': '❓ Bilmayman, hali aytmadim'}.get(data['wife_agreement'], 'None1')
-            channel_text += f"👩‍⚕️ **Ayol roziligi:** {wife_agree_text}\n"
-        if data.get('w_choice') and data.get('author') == 'wife':
-            w_choice_text = {'mjm_husband': '👥 MJM (erim bilan)', 'mjm_strangers': '👥 MJM (begona 2 erkak bilan)',
-                             'erkak': '👨 Erkak (erimdan qoniqmayapman)'}.get(data['w_choice'], 'None1')
-            channel_text += f"🎯 **Ayol tanlovi:** {w_choice_text}\n"
-        if data.get('husband_agreement') and data.get('author') == 'wife' and data.get('w_choice') == 'mjm_husband':
-            husband_agree_text = {'yes': '✅ Ha rozi', 'convince': '🔄 Yo\'q, lekin men istayman',
-                                  'unknown': '❓ Bilmayman, hali aytmadim'}.get(
-                data['husband_agreement'], 'None1')
-            channel_text += f"👨‍⚕️ **Erkak roziligi:** {husband_agree_text}\n"
+            author_text_channel_map = {'husband': 'Erkak', 'wife': 'Ayol'}
+            channel_text += f"✍️ **Yozmoqda:** {author_text_channel_map.get(data.get('author'), default_value_channel)}\n"
+        
+        agreement_text_map_channel = {
+            'Yes': '✅ Ha rozi',
+            'No': "🔄 Yo'q, lekin men istayman", 
+            'IDK': '❓ Bilmayman, hali aytmadim'
+        }
+        if data.get('author') == 'husband':
+            h_choice_text_channel_map = {'mjm': '👥 MJM', 'erkak': '👨 Erkak (ayoli uchun)'}
+            channel_text += f"🎯 **Erkak tanlovi:** {h_choice_text_channel_map.get(data.get('h_choice'), default_value_channel)}\n"
+            if data.get('mjm_experience') and data.get('h_choice') == 'mjm':
+                channel_text += f"👥 **MJM tajriba:** {data.get('mjm_experience', default_value_channel)}\n"
+            if data.get('wife_agreement'):
+                channel_text += f"👩‍⚕️ **Ayol roziligi:** {agreement_text_map_channel.get(data.get('wife_agreement'), data.get('wife_agreement', default_value_channel))}\n"
+        elif data.get('author') == 'wife':
+            w_choice_text_channel_map = {'mjm_husband': '👥 MJM (erim bilan)', 'mjm_strangers': '👥 MJM (begona 2 erkak bilan)',
+                                         'erkak': '👨 Erkak (erimdan qoniqmayapman)'}
+            channel_text += f"🎯 **Ayol tanlovi:** {w_choice_text_channel_map.get(data.get('w_choice'), default_value_channel)}\n"
+            if data.get('husband_agreement') and data.get('w_choice') == 'mjm_husband':
+                channel_text += f"👨‍⚕️ **Erkak roziligi:** {agreement_text_map_channel.get(data.get('husband_agreement'), data.get('husband_agreement', default_value_channel))}\n"
 
     if data.get('about'):
-        channel_text += f"ℹ️ **Qo'shimcha / Kutilayotgan natija:** {data['about']}\n"
+        channel_text += f"ℹ️ **Qo'shimcha malumotlar:** {data.get('about', default_value_channel)}\n"
 
-    channel_text += "\n---\nBu ariza kanalga avtomatik joylandi."
+    channel_text += "\n---\n Kanalga avtomatik joylash uchun."
 
     try:
         await bot.send_message(
@@ -438,11 +476,10 @@ async def send_application_to_destinations(data: dict, user: types.User):
         logging.error(f"Failed to send application to channel {CHANNEL_ID} for user {user.id}: {e}")
         try:
             await bot.send_message(ADMIN_USER_ID,
-                                   f"⚠️ Ogohlantirish: Foydalanuvchi `{user.id}` arizasini kanalga yuborishda xatolik: {e}",
+                                   f"⚠️ Ogohlantirish: Foydalanuvchi `{user.id}` arizasini kanalga (`{CHANNEL_ID}`) yuborishda xatolik: {e}",
                                    parse_mode="Markdown")
         except Exception as e_admin:
             logging.error(f"Failed to send error notification to admin user about channel error: {e_admin}")
-
 
 @dp.message(Command("start"))
 async def start_handler(message: types.Message, state: FSMContext):
@@ -625,14 +662,14 @@ async def gender_handler(callback: types.CallbackQuery, state: FSMContext):
     if gender == "male":
         await callback.message.edit_text(
             "Kechirasiz, bu xizmat faqat ayollar va oilalar uchun.\n"
-            "Agar oila bo'lsangiz iltimos «Oilaman» bo'limini tanlang.",
+            "Agar oila bo'lsangiz va MJM seks istayotgan bo'lsangiz/n Iltimos «Oilaman» bo'limini tanlang.",
             reply_markup=InlineKeyboardBuilder().button(
                 text="Qayta boshlash",
                 callback_data="back_start"
             ).as_markup()
         )
         await state.clear()
-        await callback.answer("Erkaklar uchun ro'yxatdan o'tish hozircha mavjud emas.", show_alert=True)
+        await callback.answer("Bu bot oila va ayollar uchun o'zlariga sherik, Hushtor topish uchun mo'ljallangan.", show_alert=True)
         return
 
     await callback.message.edit_text("Viloyatingizni tanlang:", reply_markup=viloyat_keyboard())
