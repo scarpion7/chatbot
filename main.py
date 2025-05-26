@@ -13,6 +13,8 @@ from aiogram.enums import ParseMode
 from aiogram.webhook.aiohttp_server import SimpleRequestHandler
 from aiohttp import web
 import asyncio
+from starlette.middleware.base import BaseMiddleware
+
 
 # QO'SHILDI: Xatoliklarni ushlash uchun
 from aiogram.exceptions import TelegramForbiddenError, TelegramBadRequest
