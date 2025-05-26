@@ -422,7 +422,7 @@ async def start_handler(message: types.Message, state: FSMContext):
         await message.answer("Salom! Iltimos, jinsingizni tanlang:", reply_markup=gender_keyboard())
         await state.set_state(Form.CHOOSE_GENDER)
         logging.info(f"User {user_id} started the bot.")
-   except TelegramForbiddenError:
+    except TelegramForbiddenError:
         logging.error(f"User {message.from_user.id} blocked the bot")
         await state.clear()
     except Exception as e:
