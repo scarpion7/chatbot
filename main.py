@@ -61,6 +61,20 @@ class Form(StatesGroup):
 class AdminState(StatesGroup):
     REPLYING_TO_USER = State()
 
+class ErrorMiddleware(BaseMiddleware):
+    async def __call__(self, handler, event: Update, data):
+        try:
+            return await handler(event, data)
+        except TelegramForbiddenError as e:
+            user_id = event.from_user.id if event.from_user else None
+            logging.error(f"User {user_id} blocked the bot. Error: {e}")
+            await bot.send_message(ADMIN_USER_ID, f"⚠️ User {user_id} blocked the bot")
+        except Exception as e:
+            logging.error(f"Global error: {e}", exc_info=True)
+            await bot.send_message(ADMIN_USER_ID, f"🚨 Critical error: {e}")
+
+dp.update.outer_middleware(ErrorMiddleware())
+
 
 VILOYATLAR = [
     "Andijon", "Buxoro", "Farg'ona", "Jizzax", "Qashqadaryo", "Navoiy", "Namangan",
@@ -408,12 +422,12 @@ async def start_handler(message: types.Message, state: FSMContext):
         await message.answer("Salom! Iltimos, jinsingizni tanlang:", reply_markup=gender_keyboard())
         await state.set_state(Form.CHOOSE_GENDER)
         logging.info(f"User {user_id} started the bot.")
-    except TelegramForbiddenError:
-        logging.warning(f"User {user_id} has blocked the bot. Cannot send 'start' message or initial prompt.")
-    except TelegramBadRequest as e:
-        logging.error(f"TelegramBadRequest in start_handler for user {user_id}: {e}")
+   except TelegramForbiddenError:
+        logging.error(f"User {message.from_user.id} blocked the bot")
+        await state.clear()
     except Exception as e:
-        logging.error(f"Generic error in start_handler for user {user_id}: {e}")
+        logging.error(f"Start handler error: {e}")
+        await message.answer("Botda vaqtinchalik xatolik. Iltimos keyinroq urinib ko'ring.")
 
 
 @dp.callback_query(F.data == "cancel")
@@ -782,13 +796,20 @@ async def handle_unregistered_messages(message: types.Message):
         logging.error(f"Generic error in 'handle_unregistered_messages' for user {user_id}: {e}")
 
 
-async def on_startup(app: web.Application) -> None: # app argumenti aiohttp tomonidan beriladi
+async def on_startup(app: web.Application) -> None:
     logging.info(f"Setting webhook to {WEBHOOK_URL}")
+    session = AiohttpSession()
+    await bot.session.close()  # Old sessionni yopamiz
+    bot.session = session
     try:
-        await bot.set_webhook(WEBHOOK_URL, drop_pending_updates=True) # drop_pending_updates qo'shilishi mumkin
-        logging.info("Webhook successfully set!")
+        await bot.set_webhook(
+            url=WEBHOOK_URL,
+            drop_pending_updates=True,
+            allowed_updates=dp.resolve_used_update_types()
+        )
     except Exception as e:
         logging.error(f"Error setting webhook: {e}")
+        raise
 
 
 async def on_shutdown(app: web.Application) -> None: # app argumenti aiohttp tomonidan beriladi
@@ -816,10 +837,12 @@ async def main() -> web.Application:
     app = web.Application()
 
     # QO'SHILDI: Render/UptimeRobot uchun health check endpoint
-    async def health_check_handler(request: web.Request) -> web.Response:
-        logging.debug(f"Health check request from: {request.remote}") # So'rov yuboruvchini loglash
+    async def handle_healthcheck(request):
         return web.Response(text="OK", status=200)
-    app.router.add_get("/", health_check_handler)
+
+    app.router.add_get("/", handle_healthcheck)
+    
+    return app
 
     app.on_startup.append(on_startup)
     app.on_shutdown.append(on_shutdown)
@@ -831,9 +854,23 @@ async def main() -> web.Application:
 
 
 if __name__ == "__main__":
-    logging.info("Bot starting in webhook mode...")
+    logging.basicConfig(level=logging.INFO)
+    try:
+        web.run_app(
+            main(),
+            host=WEB_SERVER_HOST,
+            port=WEB_SERVER_PORT,
+            handle_signals=True,
+            reuse_port=True
+        )
+    except KeyboardInterrupt:
+        logging.info("Bot stopped by admin")
+    except Exception as e:
+        logging.critical(f"Fatal error: {e}")
+        sys.exit(1)
+    
     # main() endi aiohttp.web.Application qaytaradi
     # asyncio.run() orqali main() chaqiriladi va Application obyekti olinadi
-    application = asyncio.run(main())
+    # application = asyncio.run(main())
     # Keyin bu obyekt web.run_app ga uzatiladi
-    web.run_app(application, host=WEB_SERVER_HOST, port=WEB_SERVER_PORT)
+    # web.run_app(application, host=WEB_SERVER_HOST, port=WEB_SERVER_PORT)
